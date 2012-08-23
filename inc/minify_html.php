@@ -1,9 +1,10 @@
 <?php
 
 class Rockstar_Speed_Minify_HTML {
-	protected $compress_css = true;
-	protected $compress_js = true;
-	protected $remove_comments = true;
+	public $use_gzip = true;
+	public $compress_css = true;
+	public $compress_js = true;
+	public $remove_comments = true;
 
 	function __construct() {
 		
@@ -19,8 +20,8 @@ class Rockstar_Speed_Minify_HTML {
 		}
 	}
 
-	function compression_finish( $html, $mode ) {
-		return $this->parseHTML( $html, $mode );
+	function compression_finish( $html ) {
+		return $this->parseHTML( $html );
 	}
 
 	public function parseHTML( $html ) {
@@ -29,7 +30,7 @@ class Rockstar_Speed_Minify_HTML {
 		return $html;
 	}
 
-	protected function minifyHTML( $html_orig, $mode = false ) {
+	protected function minifyHTML( $html_orig ) {
 		$matches = array();
 		$pattern = '/<(?<script>script).*?<\/script\s*>|<(?<style>style).*?<\/style\s*>|<!(?<comment>--).*?-->|<(?<tag>[\/\w.:-]*)(?:".*?"|\'.*?\'|[^\'">]+)*>|(?<text>((<[^!\/\w.:-])?[^<]*)+)|/si';
 
@@ -40,7 +41,7 @@ class Rockstar_Speed_Minify_HTML {
 		$raw_tag    = false;
 		
 		// Variable reused for output
-		$html_new = '';
+		$html = '';
 		
 		foreach( $matches as $token ) {
 			$tag = ( isset( $token['tag'] ) ) ? strtolower( $token['tag'] ) : null;
@@ -117,8 +118,12 @@ class Rockstar_Speed_Minify_HTML {
 			}
 		}
 
-		if ( substr_count( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) )
-			$html = ob_gzhandler( $html, $mode );
+		if ( $this->use_gzip && substr_count( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) ) {
+			header('Content-Encoding: gzip');
+			$html = gzencode( $html, 1 );
+
+			header('Content-Length: '.strlen($html));
+		}
 
 		return $html;
 	}
