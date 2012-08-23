@@ -19,8 +19,8 @@ class Rockstar_Speed_Minify_HTML {
 		}
 	}
 
-	function compression_finish( $html ) {
-		return $this->parseHTML( $html );
+	function compression_finish( $html, $mode ) {
+		return $this->parseHTML( $html, $mode );
 	}
 
 	public function parseHTML( $html ) {
@@ -29,10 +29,12 @@ class Rockstar_Speed_Minify_HTML {
 		return $html;
 	}
 
-	protected function minifyHTML( $html_orig ) {
+	protected function minifyHTML( $html_orig, $mode = false ) {
+		$matches = array();
 		$pattern = '/<(?<script>script).*?<\/script\s*>|<(?<style>style).*?<\/style\s*>|<!(?<comment>--).*?-->|<(?<tag>[\/\w.:-]*)(?:".*?"|\'.*?\'|[^\'">]+)*>|(?<text>((<[^!\/\w.:-])?[^<]*)+)|/si';
-		
-		preg_match_all( $pattern, $html_orig, $matches, PREG_SET_ORDER );
+
+		//This can go wrong when PREC is out-of-date
+		@preg_match_all( $pattern, $html_orig, $matches, PREG_SET_ORDER );
 		
 		$overriding = false;
 		$raw_tag    = false;
@@ -101,19 +103,27 @@ class Rockstar_Speed_Minify_HTML {
 			}
 			
 			if ( $strip ) {
-				$content = $this->removeWhiteSpace( $content );
+				$content = $this->remove_whitespace( $content );
 			}
 			
 			$html .= $content;
 		}
 
-		if( ! empty( $html ) )
-			return $html;
+		if( empty( $html ) ) {
+			$html = $html_orig;
 
-		return $this->removeWhiteSpace( $html_orig );
+			if( apply_filters( 'rockstarspeed_remove_whitespace_onerror', true ) ) {
+				$html = $this->remove_whitespace( $html );
+			}
+		}
+
+		if ( substr_count( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) )
+			$html = ob_gzhandler( $html, $mode );
+
+		return $html;
 	}
 
-	protected function removeWhiteSpace( $html )
+	protected function remove_whitespace( $html )
 	{
 		$html = str_replace( "\t", ' ', $html );
 		$html = str_replace( "\r", ' ', $html );
