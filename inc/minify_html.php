@@ -24,13 +24,13 @@ class Rockstar_Speed_Minify_HTML {
 		return $this->parseHTML( $html );
 	}
 
-	public function parseHTML( $html ) {
-		$html = $this->minifyHTML( $html );
+	public function parse_html( $html ) {
+		$html = $this->minify_html( $html );
 
 		return $html;
 	}
 
-	protected function minifyHTML( $html_orig ) {
+	protected function minify_html( $html_orig ) {
 		$matches = array();
 		$pattern = '/<(?<script>script).*?<\/script\s*>|<(?<style>style).*?<\/style\s*>|<!(?<comment>--).*?-->|<(?<tag>[\/\w.:-]*)(?:".*?"|\'.*?\'|[^\'">]+)*>|(?<text>((<[^!\/\w.:-])?[^<]*)+)|/si';
 
