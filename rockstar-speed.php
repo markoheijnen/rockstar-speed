@@ -1,11 +1,11 @@
 <?php
 
-//include 'inc/cdn.php';
-include 'inc/minify_html.php';
+include 'inc/class.cdn.php';
+include 'inc/class.minify_html.php';
 
 class Rockstar_Speed {
 	function __construct() {
-		//new Rockstar_Speed_Cdn();
+		new Rockstar_Speed_Cdn();
 
 		$minifier_html = new Rockstar_Speed_Minify_HTML();
 		if ( ! is_admin() ) {
