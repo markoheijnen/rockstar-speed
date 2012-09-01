@@ -12,7 +12,7 @@ class Rockstar_Speed_Cdn {
 		$this->site_url = preg_replace( "((https?)://)", "", site_url() );
 		$this->cdn_url  = apply_filters( 'rockstarspeed_cdn_url', false );
 
-		if( ! $this->cdn_url ) {
+		if( $this->cdn_url ) {
 			add_action( 'template_redirect', array( &$this, 'activate_cdn' ) );
 		}
 	}
