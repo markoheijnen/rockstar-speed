@@ -17,9 +17,11 @@ class Rockstar_Speed {
 	}
 
 	function _remove_version( $src ) {
-		$parts = explode( '?', $src );
-		return $parts[0];
-	}
+		if( strpos( $src, '?ver=' ) )
+			$src = remove_query_arg( 'ver', $src );
 
+		return $src;
+	}
 }
+
 new Rockstar_Speed;
