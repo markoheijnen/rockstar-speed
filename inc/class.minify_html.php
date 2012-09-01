@@ -21,7 +21,7 @@ class Rockstar_Speed_Minify_HTML {
 	}
 
 	function compression_finish( $html ) {
-		return $this->parseHTML( $html );
+		return $this->parse_html( $html );
 	}
 
 	public function parse_html( $html ) {
