@@ -8,7 +8,7 @@ class Rockstar_Speed_Cdn {
 		add_action( 'init', array( &$this, 'set_urls' ) );
 	}
 
-	function set_site_url() {
+	function set_urls() {
 		$this->site_url = preg_replace( "((https?)://)", "", site_url() );
 		$this->cdn_url  = apply_filters( 'rockstarspeed_cdn_url', false );
 
