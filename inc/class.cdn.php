@@ -1,44 +1,37 @@
 <?php
 
 class Rockstar_Speed_Cdn {
-	private $site_url;
-	private $cdn_url;
+	private $site_domain;
+	private $cdn_domain;
+	private $extensions;
 
-	function __construct() {
-		add_action( 'init', array( &$this, 'set_urls' ) );
+	public function __construct() {
+		add_action( 'init', array( $this, 'set_urls' ) );
 	}
 
-	function set_urls() {
-		$this->site_url = preg_replace( "((https?)://)", "", site_url() );
-		$this->cdn_url  = apply_filters( 'rockstarspeed_cdn_url', false );
+	public function set_urls() {
+		$this->site_domain = preg_replace( "((https?)://)", "", site_url() );
+		$this->cdn_domain  = apply_filters( 'rockstarspeed_cdn_domain', false );
+		$this->extensions  = apply_filters( 'rockstarspeed_cdn_extensions', array( 'jpe?g', 'gif', 'png', 'css', 'bmp', 'js', 'ico' ) );
 
-		if( $this->cdn_url ) {
-			add_action( 'template_redirect', array( &$this, 'activate_cdn' ) );
-		}
+		if( $this->cdn_domain && ! is_admin() )
+			$this->activate_cdn();
 	}
 
-	function activate_cdn() {
-		add_filter( 'script_loader_src', array( &$this, 'filter_js' ) );
-		add_filter( 'style_loader_src', array( &$this, 'filter_css' ) );
-		add_filter( 'theme_root_uri', array( &$this, 'filter_theme' ) );
+	private function activate_cdn() {
+		add_filter( 'script_loader_src', array( $this, 'str_replace' ) );
+		add_filter( 'style_loader_src', array( $this, 'str_replace' ) );
+		add_filter( 'theme_root_uri', array( $this, 'str_replace' ) );
+
+		add_filter( 'the_content', array( $this, 'preg_replace' ) );
 	}
 
-	function filter_js( $url ) {
-		$url = $this->replace( $url );
-		return $url;
+	public function str_replace( $url ) {
+		return str_replace( $this->site_domain, $this->cdn_domain, $url );
 	}
 
-	function filter_css( $url ) {
-		$url = $this->replace( $url );
-		return $url;
+	public function preg_replace( $content ) {
+		return preg_replace( "#=([\"'])(https?://{$this->site_domain})?/([^/](?:(?!\\1).)+)\.(" . implode( '|', $this->extensions ) . ")(\?((?:(?!\\1).)+))?\\1#", '=$1http://' . $this->cdn_domain . '/$3.$4$5$1', $content );
 	}
 
-	function filter_theme( $url ) {
-		$url = $this->replace( $url );
-		return $url;
-	}
-
-	private function replace( $url ) {
-		return str_replace( $this->site_url, $this->cdn_url, $url );
-	}
 }
